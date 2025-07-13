@@ -63,22 +63,6 @@ type ExampleBasic struct {
 	StringSliceSlice  [][]string    `default:"[[1],[]]"`
 
 	DateTime string `default:"{{date:1,-10,0}} {{time:1,-5,10}}"`
-
-	BoolPtr     *bool          `default:"false"`
-	IntPtr      *int           `default:"33"`
-	Int8Ptr     *int8          `default:"8"`
-	Int16Ptr    *int16         `default:"16"`
-	Int32Ptr    *int32         `default:"32"`
-	Int64Ptr    *int64         `default:"64"`
-	UIntPtr     *uint          `default:"11"`
-	UInt8Ptr    *uint8         `default:"18"`
-	UInt16Ptr   *uint16        `default:"116"`
-	UInt32Ptr   *uint32        `default:"132"`
-	UInt64Ptr   *uint64        `default:"164"`
-	Float32Ptr  *float32       `default:"3.2"`
-	Float64Ptr  *float64       `default:"6.4"`
-	DurationPtr *time.Duration `default:"4s"`
-	SecondPtr   *time.Duration `default:"5s"`
 }
 
 func (s *DefaultsSuite) TestSetDefaultsBasic(c *check.C) {
@@ -123,21 +107,6 @@ func (DefaultsSuite) assertTypes(c *check.C, foo *ExampleBasic) {
 	c.Assert(foo.IntSliceSlice, check.DeepEquals, [][]int{{1}, {2}, {3}, {4}})
 	c.Assert(foo.StringSliceSlice, check.DeepEquals, [][]string{{"1"}, {}})
 	c.Assert(foo.DateTime, check.Equals, "2020-08-10 12:55:10")
-	c.Assert(*foo.BoolPtr, check.Equals, false)
-	c.Assert(*foo.IntPtr, check.Equals, 33)
-	c.Assert(*foo.Int8Ptr, check.Equals, int8(8))
-	c.Assert(*foo.Int16Ptr, check.Equals, int16(16))
-	c.Assert(*foo.Int32Ptr, check.Equals, int32(32))
-	c.Assert(*foo.Int64Ptr, check.Equals, int64(64))
-	c.Assert(*foo.UIntPtr, check.Equals, uint(11))
-	c.Assert(*foo.UInt8Ptr, check.Equals, uint8(18))
-	c.Assert(*foo.UInt16Ptr, check.Equals, uint16(116))
-	c.Assert(*foo.UInt32Ptr, check.Equals, uint32(132))
-	c.Assert(*foo.UInt64Ptr, check.Equals, uint64(164))
-	c.Assert(*foo.Float32Ptr, check.Equals, float32(3.2))
-	c.Assert(*foo.Float64Ptr, check.Equals, 6.4)
-	c.Assert(*foo.DurationPtr, check.Equals, time.Second)
-	c.Assert(*foo.SecondPtr, check.Equals, time.Second)
 }
 
 func (DefaultsSuite) TestSetDefaultsWithValues(c *check.C) {
@@ -150,9 +119,6 @@ func (DefaultsSuite) TestSetDefaultsWithValues(c *check.C) {
 		Children: []Child{{Name: "alice"}, {Name: "bob", Age: 2}},
 	}
 
-	intzero := 0
-	foo.IntPtr = &intzero
-
 	SetDefaults(foo)
 
 	c.Assert(foo.Integer, check.Equals, 55)
@@ -162,8 +128,6 @@ func (DefaultsSuite) TestSetDefaultsWithValues(c *check.C) {
 	c.Assert(string(foo.Bytes), check.Equals, "foo")
 	c.Assert(foo.Children[0].Age, check.Equals, 10)
 	c.Assert(foo.Children[1].Age, check.Equals, 2)
-
-	c.Assert(*foo.IntPtr, check.Equals, 0)
 }
 
 func (DefaultsSuite) BenchmarkLogic(c *check.C) {

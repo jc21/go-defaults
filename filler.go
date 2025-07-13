@@ -89,8 +89,6 @@ func (Filler) isEmpty(field *FieldData) bool {
 		}
 	case reflect.String:
 		return field.Value.String() == ""
-	case reflect.Ptr:
-		return field.Value.IsZero()
 	}
 	return true
 }
