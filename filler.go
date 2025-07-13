@@ -25,23 +25,24 @@ type Filler struct {
 
 // Fill apply all the functions contained on Filler, setting all the possible
 // values
-func (f *Filler) Fill(variable interface{}) {
+func (f *Filler) Fill(variable any) {
 	fields := f.getFields(variable)
 	f.SetDefaultValues(fields)
 }
 
-func (f *Filler) getFields(variable interface{}) []*FieldData {
+func (f *Filler) getFields(variable any) []*FieldData {
 	valueObject := reflect.ValueOf(variable).Elem()
 
 	return f.GetFieldsFromValue(valueObject, nil)
 }
 
+// GetFieldsFromValue ...
 func (f *Filler) GetFieldsFromValue(valueObject reflect.Value, parent *FieldData) []*FieldData {
 	typeObject := valueObject.Type()
 
 	count := valueObject.NumField()
 	var results []*FieldData
-	for i := 0; i < count; i++ {
+	for i := range count {
 		value := valueObject.Field(i)
 		field := typeObject.Field(i)
 
@@ -58,6 +59,7 @@ func (f *Filler) GetFieldsFromValue(valueObject reflect.Value, parent *FieldData
 	return results
 }
 
+// SetDefaultValues ...
 func (f *Filler) SetDefaultValues(fields []*FieldData) {
 	for _, field := range fields {
 		if f.isEmpty(field) {
@@ -66,7 +68,7 @@ func (f *Filler) SetDefaultValues(fields []*FieldData) {
 	}
 }
 
-func (f *Filler) isEmpty(field *FieldData) bool {
+func (Filler) isEmpty(field *FieldData) bool {
 	switch field.Value.Kind() {
 	case reflect.Bool:
 		return !field.Value.Bool()
@@ -93,6 +95,7 @@ func (f *Filler) isEmpty(field *FieldData) bool {
 	return true
 }
 
+// SetDefaultValue ...
 func (f *Filler) SetDefaultValue(field *FieldData) {
 	getters := []func(field *FieldData) FillerFunc{
 		f.getFunctionByName,
@@ -108,12 +111,10 @@ func (f *Filler) SetDefaultValue(field *FieldData) {
 			return
 		}
 	}
-
-	return
 }
 
 func (f *Filler) getFunctionByName(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByName[field.Field.Name]; ok == true {
+	if f, ok := f.FuncByName[field.Field.Name]; ok {
 		return f
 	}
 
@@ -121,7 +122,7 @@ func (f *Filler) getFunctionByName(field *FieldData) FillerFunc {
 }
 
 func (f *Filler) getFunctionByType(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok == true {
+	if f, ok := f.FuncByType[GetTypeHash(field.Field.Type)]; ok {
 		return f
 	}
 
@@ -129,14 +130,14 @@ func (f *Filler) getFunctionByType(field *FieldData) FillerFunc {
 }
 
 func (f *Filler) getFunctionByKind(field *FieldData) FillerFunc {
-	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok == true {
+	if f, ok := f.FuncByKind[field.Field.Type.Kind()]; ok {
 		return f
 	}
 
 	return nil
 }
 
-func (f *Filler) getFunctionByInterface(field *FieldData) FillerFunc {
+func (Filler) getFunctionByInterface(field *FieldData) FillerFunc {
 	if !field.Field.Type.Implements(defaultsType) {
 		return nil
 	}
@@ -155,7 +156,7 @@ func (f *Filler) getFunctionByInterface(field *FieldData) FillerFunc {
 var defaultsType = reflect.TypeOf((*Defaults)(nil)).Elem()
 
 type Defaults interface {
-	Defaults(tagValue string) interface{}
+	Defaults(tagValue string) any
 }
 
 // TypeHash is a string representing a reflect.Type following the next pattern:

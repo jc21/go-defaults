@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"bou.ke/monkey"
-	. "gopkg.in/check.v1"
+	check "gopkg.in/check.v1"
 )
 
 // Hook up gocheck into the "go test" runner.
@@ -16,12 +16,12 @@ func Test(t *testing.T) {
 		return t
 	})
 
-	TestingT(t)
+	check.TestingT(t)
 }
 
 type DefaultsSuite struct{}
 
-var _ = Suite(&DefaultsSuite{})
+var _ = check.Suite(&DefaultsSuite{})
 
 type Parent struct {
 	Children []Child
@@ -48,14 +48,15 @@ type ExampleBasic struct {
 	Bytes      []byte  `default:"bar"`
 	Float32    float32 `default:"3.2"`
 	Float64    float64 `default:"6.4"`
-	Struct     struct {
+	// nolint: revive
+	Struct struct {
 		Bool    bool `default:"true"`
 		Integer int  `default:"33"`
 	}
-	Duration          time.Duration `default:"1s"`
+	Duration          time.Duration `default:"3s"`
 	Children          []Child
-	Second            time.Duration `default:"1s"`
-	Integer64Duration time.Duration `default:"1000000000"`
+	Second            time.Duration `default:"2s"`
+	Integer64Duration time.Duration `default:"6000000000"`
 	StringSlice       []string      `default:"[1,2,3,4]"`
 	IntSlice          []int         `default:"[1,2,3,4]"`
 	IntSliceSlice     [][]int       `default:"[[1],[2],[3],[4]]"`
@@ -76,14 +77,13 @@ type ExampleBasic struct {
 	UInt64Ptr   *uint64        `default:"164"`
 	Float32Ptr  *float32       `default:"3.2"`
 	Float64Ptr  *float64       `default:"6.4"`
-	DurationPtr *time.Duration `default:"1s"`
-	SecondPtr   *time.Duration `default:"1s"`
+	DurationPtr *time.Duration `default:"4s"`
+	SecondPtr   *time.Duration `default:"5s"`
 }
 
-func (s *DefaultsSuite) TestSetDefaultsBasic(c *C) {
+func (s *DefaultsSuite) TestSetDefaultsBasic(c *check.C) {
 	foo := &ExampleBasic{}
 	SetDefaults(foo)
-
 	s.assertTypes(c, foo)
 }
 
@@ -91,57 +91,56 @@ type ExampleNested struct {
 	Struct ExampleBasic
 }
 
-func (s *DefaultsSuite) TestSetDefaultsNested(c *C) {
+func (s *DefaultsSuite) TestSetDefaultsNested(c *check.C) {
 	foo := &ExampleNested{}
 	SetDefaults(foo)
-
 	s.assertTypes(c, &foo.Struct)
 }
 
-func (s *DefaultsSuite) assertTypes(c *C, foo *ExampleBasic) {
-	c.Assert(foo.Bool, Equals, true)
-	c.Assert(foo.Integer, Equals, 33)
-	c.Assert(foo.Integer8, Equals, int8(8))
-	c.Assert(foo.Integer16, Equals, int16(16))
-	c.Assert(foo.Integer32, Equals, int32(32))
-	c.Assert(foo.Integer64, Equals, int64(64))
-	c.Assert(foo.UInteger, Equals, uint(11))
-	c.Assert(foo.UInteger8, Equals, uint8(18))
-	c.Assert(foo.UInteger16, Equals, uint16(116))
-	c.Assert(foo.UInteger32, Equals, uint32(132))
-	c.Assert(foo.UInteger64, Equals, uint64(164))
-	c.Assert(foo.String, Equals, "foo")
-	c.Assert(string(foo.Bytes), Equals, "bar")
-	c.Assert(foo.Float32, Equals, float32(3.2))
-	c.Assert(foo.Float64, Equals, 6.4)
-	c.Assert(foo.Struct.Bool, Equals, true)
-	c.Assert(foo.Duration, Equals, time.Second)
-	c.Assert(foo.Children, IsNil)
-	c.Assert(foo.Second, Equals, time.Second)
-	c.Assert(foo.Integer64Duration, Equals, time.Second)
-	c.Assert(foo.StringSlice, DeepEquals, []string{"1", "2", "3", "4"})
-	c.Assert(foo.IntSlice, DeepEquals, []int{1, 2, 3, 4})
-	c.Assert(foo.IntSliceSlice, DeepEquals, [][]int{[]int{1}, []int{2}, []int{3}, []int{4}})
-	c.Assert(foo.StringSliceSlice, DeepEquals, [][]string{[]string{"1"}, []string{}})
-	c.Assert(foo.DateTime, Equals, "2020-08-10 12:55:10")
-	c.Assert(*foo.BoolPtr, Equals, false)
-	c.Assert(*foo.IntPtr, Equals, 33)
-	c.Assert(*foo.Int8Ptr, Equals, int8(8))
-	c.Assert(*foo.Int16Ptr, Equals, int16(16))
-	c.Assert(*foo.Int32Ptr, Equals, int32(32))
-	c.Assert(*foo.Int64Ptr, Equals, int64(64))
-	c.Assert(*foo.UIntPtr, Equals, uint(11))
-	c.Assert(*foo.UInt8Ptr, Equals, uint8(18))
-	c.Assert(*foo.UInt16Ptr, Equals, uint16(116))
-	c.Assert(*foo.UInt32Ptr, Equals, uint32(132))
-	c.Assert(*foo.UInt64Ptr, Equals, uint64(164))
-	c.Assert(*foo.Float32Ptr, Equals, float32(3.2))
-	c.Assert(*foo.Float64Ptr, Equals, 6.4)
-	c.Assert(*foo.DurationPtr, Equals, time.Second)
-	c.Assert(*foo.SecondPtr, Equals, time.Second)
+func (DefaultsSuite) assertTypes(c *check.C, foo *ExampleBasic) {
+	c.Assert(foo.Bool, check.Equals, true)
+	c.Assert(foo.Integer, check.Equals, 33)
+	c.Assert(foo.Integer8, check.Equals, int8(8))
+	c.Assert(foo.Integer16, check.Equals, int16(16))
+	c.Assert(foo.Integer32, check.Equals, int32(32))
+	c.Assert(foo.Integer64, check.Equals, int64(64))
+	c.Assert(foo.UInteger, check.Equals, uint(11))
+	c.Assert(foo.UInteger8, check.Equals, uint8(18))
+	c.Assert(foo.UInteger16, check.Equals, uint16(116))
+	c.Assert(foo.UInteger32, check.Equals, uint32(132))
+	c.Assert(foo.UInteger64, check.Equals, uint64(164))
+	c.Assert(foo.String, check.Equals, "foo")
+	c.Assert(string(foo.Bytes), check.Equals, "bar")
+	c.Assert(foo.Float32, check.Equals, float32(3.2))
+	c.Assert(foo.Float64, check.Equals, 6.4)
+	c.Assert(foo.Struct.Bool, check.Equals, true)
+	c.Assert(foo.Duration, check.Equals, 3*time.Second)
+	c.Assert(foo.Children, check.IsNil)
+	c.Assert(foo.Second, check.Equals, 2*time.Second)
+	c.Assert(foo.Integer64Duration, check.Equals, 6*time.Second)
+	c.Assert(foo.StringSlice, check.DeepEquals, []string{"1", "2", "3", "4"})
+	c.Assert(foo.IntSlice, check.DeepEquals, []int{1, 2, 3, 4})
+	c.Assert(foo.IntSliceSlice, check.DeepEquals, [][]int{{1}, {2}, {3}, {4}})
+	c.Assert(foo.StringSliceSlice, check.DeepEquals, [][]string{{"1"}, {}})
+	c.Assert(foo.DateTime, check.Equals, "2020-08-10 12:55:10")
+	c.Assert(*foo.BoolPtr, check.Equals, false)
+	c.Assert(*foo.IntPtr, check.Equals, 33)
+	c.Assert(*foo.Int8Ptr, check.Equals, int8(8))
+	c.Assert(*foo.Int16Ptr, check.Equals, int16(16))
+	c.Assert(*foo.Int32Ptr, check.Equals, int32(32))
+	c.Assert(*foo.Int64Ptr, check.Equals, int64(64))
+	c.Assert(*foo.UIntPtr, check.Equals, uint(11))
+	c.Assert(*foo.UInt8Ptr, check.Equals, uint8(18))
+	c.Assert(*foo.UInt16Ptr, check.Equals, uint16(116))
+	c.Assert(*foo.UInt32Ptr, check.Equals, uint32(132))
+	c.Assert(*foo.UInt64Ptr, check.Equals, uint64(164))
+	c.Assert(*foo.Float32Ptr, check.Equals, float32(3.2))
+	c.Assert(*foo.Float64Ptr, check.Equals, 6.4)
+	c.Assert(*foo.DurationPtr, check.Equals, time.Second)
+	c.Assert(*foo.SecondPtr, check.Equals, time.Second)
 }
 
-func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
+func (DefaultsSuite) TestSetDefaultsWithValues(c *check.C) {
 	foo := &ExampleBasic{
 		Integer:  55,
 		UInteger: 22,
@@ -156,18 +155,18 @@ func (s *DefaultsSuite) TestSetDefaultsWithValues(c *C) {
 
 	SetDefaults(foo)
 
-	c.Assert(foo.Integer, Equals, 55)
-	c.Assert(foo.UInteger, Equals, uint(22))
-	c.Assert(foo.Float32, Equals, float32(9.9))
-	c.Assert(foo.String, Equals, "bar")
-	c.Assert(string(foo.Bytes), Equals, "foo")
-	c.Assert(foo.Children[0].Age, Equals, 10)
-	c.Assert(foo.Children[1].Age, Equals, 2)
+	c.Assert(foo.Integer, check.Equals, 55)
+	c.Assert(foo.UInteger, check.Equals, uint(22))
+	c.Assert(foo.Float32, check.Equals, float32(9.9))
+	c.Assert(foo.String, check.Equals, "bar")
+	c.Assert(string(foo.Bytes), check.Equals, "foo")
+	c.Assert(foo.Children[0].Age, check.Equals, 10)
+	c.Assert(foo.Children[1].Age, check.Equals, 2)
 
-	c.Assert(*foo.IntPtr, Equals, 0)
+	c.Assert(*foo.IntPtr, check.Equals, 0)
 }
 
-func (s *DefaultsSuite) BenchmarkLogic(c *C) {
+func (DefaultsSuite) BenchmarkLogic(c *check.C) {
 	for i := 0; i < c.N; i++ {
 		foo := &ExampleBasic{}
 		SetDefaults(foo)

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// Applies the default values to the struct object, the struct type must have
+// SetDefaults Applies the default values to the struct object, the struct type must have
 // the StructTag with name "default" and the directed value.
 //
 // Usage
@@ -23,13 +23,13 @@ import (
 //
 //	 foo := &ExampleBasic{}
 //	 SetDefaults(foo)
-func SetDefaults(variable interface{}) {
+func SetDefaults(variable any) {
 	getDefaultFiller().Fill(variable)
 }
 
 var (
 	defaultFillerOnce sync.Once
-	defaultFiller     *Filler = nil
+	defaultFiller     *Filler
 )
 
 func getDefaultFiller() *Filler {
@@ -112,12 +112,12 @@ func newDefaultFiller() *Filler {
 			field.Value.SetBytes([]byte(field.TagValue))
 		case reflect.Struct:
 			count := field.Value.Len()
-			for i := 0; i < count; i++ {
+			for i := range count {
 				fields := getDefaultFiller().GetFieldsFromValue(field.Value.Index(i), nil)
 				getDefaultFiller().SetDefaultValues(fields)
 			}
 		default:
-			//处理形如 [1,2,3,4]
+			// 处理形如 [1,2,3,4]
 			reg := regexp.MustCompile(`^\[(.*)\]$`)
 			matchs := reg.FindStringSubmatch(field.TagValue)
 			if len(matchs) != 2 {
@@ -128,7 +128,7 @@ func newDefaultFiller() *Filler {
 			} else {
 				defaultValue := strings.Split(matchs[1], ",")
 				result := reflect.MakeSlice(field.Value.Type(), len(defaultValue), len(defaultValue))
-				for i := 0; i < len(defaultValue); i++ {
+				for i := range defaultValue {
 					itemValue := result.Index(i)
 					item := &FieldData{
 						Value:    itemValue,
@@ -157,15 +157,15 @@ func newDefaultFiller() *Filler {
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Int8:
 			v, _ := strconv.ParseInt(field.TagValue, 10, 64)
-			value := int8(v)
+			value := int8(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Int16:
 			v, _ := strconv.ParseInt(field.TagValue, 10, 64)
-			value := int16(v)
+			value := int16(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Int32:
 			v, _ := strconv.ParseInt(field.TagValue, 10, 64)
-			value := int32(v)
+			value := int32(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Int64:
 			if field.Field.Type == reflect.TypeOf(time.Second) {
@@ -181,15 +181,15 @@ func newDefaultFiller() *Filler {
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Uint8:
 			v, _ := strconv.ParseUint(field.TagValue, 10, 64)
-			value := uint8(v)
+			value := uint8(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Uint16:
 			v, _ := strconv.ParseUint(field.TagValue, 10, 64)
-			value := uint16(v)
+			value := uint16(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Uint32:
 			v, _ := strconv.ParseUint(field.TagValue, 10, 64)
-			value := uint32(v)
+			value := uint32(v) // nolint: gosec
 			field.Value.Set(reflect.ValueOf(&value))
 		case reflect.Uint64:
 			value, _ := strconv.ParseUint(field.TagValue, 10, 64)
@@ -211,14 +211,11 @@ func newDefaultFiller() *Filler {
 }
 
 func parseDateTimeString(data string) string {
-
 	pattern := regexp.MustCompile(`\{\{(\w+\:(?:-|)\d*,(?:-|)\d*,(?:-|)\d*)\}\}`)
 	matches := pattern.FindAllStringSubmatch(data, -1) // matches is [][]string
 	for _, match := range matches {
-
 		tags := strings.Split(match[1], ":")
 		if len(tags) == 2 {
-
 			valueStrings := strings.Split(tags[1], ",")
 			if len(valueStrings) == 3 {
 				var values [3]int
@@ -228,21 +225,18 @@ func parseDateTimeString(data string) string {
 				}
 
 				switch tags[0] {
-
 				case "date":
 					str := time.Now().AddDate(values[0], values[1], values[2]).Format("2006-01-02")
-					data = strings.Replace(data, match[0], str, -1)
-					break
+					data = strings.ReplaceAll(data, match[0], str)
+
 				case "time":
 					str := time.Now().Add((time.Duration(values[0]) * time.Hour) +
 						(time.Duration(values[1]) * time.Minute) +
 						(time.Duration(values[2]) * time.Second)).Format("15:04:05")
-					data = strings.Replace(data, match[0], str, -1)
-					break
+					data = strings.ReplaceAll(data, match[0], str)
 				}
 			}
 		}
-
 	}
 	return data
 }

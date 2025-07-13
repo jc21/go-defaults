@@ -1,21 +1,22 @@
 package defaults
 
 import (
-	"crypto/md5"
+	"crypto/md5" // nolint: gosec
 	"encoding/hex"
-	"math/rand"
+	"math/rand/v2"
 	"reflect"
 	"sync"
 	"time"
 )
 
-func Factory(variable interface{}) {
+// Factory ...
+func Factory(variable any) {
 	getFactoryFiller().Fill(variable)
 }
 
 var (
 	factoryFillerOnce sync.Once
-	factoryFiller     *Filler = nil
+	factoryFiller     *Filler
 )
 
 func getFactoryFiller() *Filler {
@@ -27,12 +28,13 @@ func getFactoryFiller() *Filler {
 }
 
 func newFactoryFiller() *Filler {
-	rand.Seed(time.Now().UTC().UnixNano())
+	// nolint: gosec
+	r := rand.New(rand.NewPCG(1, 2))
 
 	funcs := make(map[reflect.Kind]FillerFunc, 0)
 
 	funcs[reflect.Bool] = func(field *FieldData) {
-		if rand.Intn(1) == 1 {
+		if r.IntN(2) == 1 {
 			field.Value.SetBool(true)
 		} else {
 			field.Value.SetBool(false)
@@ -40,7 +42,7 @@ func newFactoryFiller() *Filler {
 	}
 
 	funcs[reflect.Int] = func(field *FieldData) {
-		field.Value.SetInt(int64(rand.Int()))
+		field.Value.SetInt(int64(r.Int()))
 	}
 
 	funcs[reflect.Int8] = funcs[reflect.Int]
@@ -49,13 +51,13 @@ func newFactoryFiller() *Filler {
 	funcs[reflect.Int64] = funcs[reflect.Int]
 
 	funcs[reflect.Float32] = func(field *FieldData) {
-		field.Value.SetFloat(rand.Float64())
+		field.Value.SetFloat(r.Float64())
 	}
 
 	funcs[reflect.Float64] = funcs[reflect.Float32]
 
 	funcs[reflect.Uint] = func(field *FieldData) {
-		field.Value.SetUint(uint64(rand.Uint32()))
+		field.Value.SetUint(uint64(r.Uint32()))
 	}
 
 	funcs[reflect.Uint8] = funcs[reflect.Uint]
@@ -86,6 +88,7 @@ func newFactoryFiller() *Filler {
 }
 
 func randomString() string {
+	// nolint: gosec
 	hash := md5.Sum([]byte(time.Now().UTC().String()))
 	return hex.EncodeToString(hash[:])
 }
