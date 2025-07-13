@@ -1,13 +1,13 @@
-module github.com/mcuadros/go-defaults
+module github.com/jc21/go-defaults
 
-go 1.19
+go 1.24
 
 require (
 	bou.ke/monkey v1.0.2
-	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 )
 
 require (
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.1.0 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 )
